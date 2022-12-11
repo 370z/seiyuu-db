@@ -3,7 +3,7 @@ import {useLocation, useNavigate} from 'react-router-dom';
 function Header() {
     const location = useLocation();
     const navigate = useNavigate();
-    console.log(location)
+    // console.log(location)
     function pathMathRoute(route) {
         if(route === location.pathname) {
             return true
