@@ -1,15 +1,26 @@
 import React, { useState } from "react";
 import checkBrowser from "../utils/checkBrowser";
 import { Link } from "react-router-dom";
-import OAuth from './../components/OAuth';
+import OAuth from "./../components/OAuth";
+import { toast } from "react-toastify";
+import { getAuth, sendPasswordResetEmail } from "firebase/auth";
 
 function ForgotPassword() {
-
   const [email, setEmail] = useState("");
-
 
   const onChange = (e) => {
     setEmail(e.target.value);
+  };
+  const onSubmit = async (e) => {
+    e.preventDefault();
+    try {
+      const auth = getAuth();
+      await sendPasswordResetEmail(auth, email);
+
+      toast.success("Password reset email sent");
+    } catch (error) {
+      toast.error("Could not send reset password");
+    }
   };
   return (
     <section>
@@ -23,7 +34,7 @@ function ForgotPassword() {
           />
         </div>
         <div className="w-full md:w-[67%] lg:w-[40%] lg:ml-20">
-          <form>
+          <form onSubmit={onSubmit}>
             <input
               className="w-full px-4 py-2 mb-6 text-xl text-gray-700 transition ease-in-out bg-white border-gray-300 rounded"
               type="email"
@@ -32,7 +43,7 @@ function ForgotPassword() {
               onChange={onChange}
               placeholder="Email Address"
             />
-          
+
             <div className="flex justify-between text-sm whitespace-nowrap sm:text-lg">
               <p className="mb-6">
                 Don't have an account?
@@ -53,17 +64,16 @@ function ForgotPassword() {
               </p>
             </div>
             <button
-            className="w-full py-4 text-sm font-medium text-white transition duration-200 ease-in-out bg-blue-600 rounded shadow-md px-7 hover:bg-blue-700 hover:shadow-lg active:bg-blue-800"
-            type="submit"
-          >
-            Send reset password
-          </button>
-          <div className="flex items-center my-4 before:border-t before:flex-1 before:border-gray-300 after:border-t after:flex-1 after:border-gray-300">
-            <p className="mx-4 font-semibold text-center">OR</p>
-          </div>
-          <OAuth/>
+              className="w-full py-4 text-sm font-medium text-white transition duration-200 ease-in-out bg-blue-600 rounded shadow-md px-7 hover:bg-blue-700 hover:shadow-lg active:bg-blue-800"
+              type="submit"
+            >
+              Send reset password
+            </button>
+            <div className="flex items-center my-4 before:border-t before:flex-1 before:border-gray-300 after:border-t after:flex-1 after:border-gray-300">
+              <p className="mx-4 font-semibold text-center">OR</p>
+            </div>
+            <OAuth />
           </form>
-
         </div>
       </div>
     </section>

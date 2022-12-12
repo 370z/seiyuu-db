@@ -1,9 +1,14 @@
 import React, { useState } from "react";
 import checkBrowser from "../utils/checkBrowser";
 import { Link } from "react-router-dom";
-import OAuth from './../components/OAuth';
+import OAuth from "./../components/OAuth";
+import { signInWithEmailAndPassword,getAuth } from "firebase/auth";
+import { toast } from "react-toastify";
+import { useNavigate } from "react-router-dom";
 
 function Signin() {
+  const navigate = useNavigate();
+
   const [showPassword, setShowPassword] = useState(false);
   // console.log(navigator.userAgent)
   // checkBrowser(navigator.userAgent);
@@ -24,6 +29,24 @@ function Signin() {
       [e.target.id]: e.target.value,
     }));
   };
+  const onSubmit = async (e) => {
+    e.preventDefault();
+    try {
+      const auth = getAuth();
+      const user = await signInWithEmailAndPassword(auth,email,password);
+      
+      
+      if(user){
+        toast.success("Signed in!");
+        navigate("/");
+        
+      }
+      
+    } catch (error) {
+      toast.error(error.message);
+    }
+  };
+
   return (
     <section>
       <h1 className="mt-6 text-3xl font-bold text-center">Sign In</h1>
@@ -36,7 +59,7 @@ function Signin() {
           />
         </div>
         <div className="w-full md:w-[67%] lg:w-[40%] lg:ml-20">
-          <form>
+          <form onSubmit={onSubmit}>
             <input
               className="w-full px-4 py-2 mb-6 text-xl text-gray-700 transition ease-in-out bg-white border-gray-300 rounded"
               type="email"
@@ -75,17 +98,16 @@ function Signin() {
               </p>
             </div>
             <button
-            className="w-full py-4 text-sm font-medium text-white transition duration-200 ease-in-out bg-blue-600 rounded shadow-md px-7 hover:bg-blue-700 hover:shadow-lg active:bg-blue-800"
-            type="submit"
-          >
-            Sign In
-          </button>
-          <div className="flex items-center my-4 before:border-t before:flex-1 before:border-gray-300 after:border-t after:flex-1 after:border-gray-300">
-            <p className="mx-4 font-semibold text-center">OR</p>
-          </div>
-          <OAuth/>
+              className="w-full py-4 text-sm font-medium text-white transition duration-200 ease-in-out bg-blue-600 rounded shadow-md px-7 hover:bg-blue-700 hover:shadow-lg active:bg-blue-800"
+              type="submit"
+            >
+              Sign In
+            </button>
+            <div className="flex items-center my-4 before:border-t before:flex-1 before:border-gray-300 after:border-t after:flex-1 after:border-gray-300">
+              <p className="mx-4 font-semibold text-center">OR</p>
+            </div>
+            <OAuth />
           </form>
-
         </div>
       </div>
     </section>
