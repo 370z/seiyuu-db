@@ -1,7 +1,15 @@
 import React, { useState } from "react";
 import checkBrowser from "../utils/checkBrowser";
-import { Link } from "react-router-dom";
-import OAuth from './../components/OAuth';
+import { Link,useNavigate } from "react-router-dom";
+import OAuth from "./../components/OAuth";
+import {
+  getAuth,
+  createUserWithEmailAndPassword,
+  updateProfile,
+} from "firebase/auth";
+import { db } from "../firebase";
+import { serverTimestamp, setDoc,doc } from "firebase/firestore";
+import { toast } from "react-toastify";
 
 function SignUp() {
   const [showPassword, setShowPassword] = useState(false);
@@ -13,17 +21,48 @@ function SignUp() {
   const [formData, setFormData] = useState({
     email: "",
     password: "",
-    name:"",
+    name: "",
     rememberMe: false,
     password_confirmation: "",
   });
 
-  const { email, password,name } = formData;
+
+  const { email, password, name } = formData;
+  const navigate = useNavigate();
+  
   const onChange = (e) => {
     setFormData((prevState) => ({
       ...prevState,
       [e.target.id]: e.target.value,
     }));
+  };
+  const onSubmit = async (e) => {
+    e.preventDefault();
+    try {
+      const auth = getAuth();
+      const userCredential = await createUserWithEmailAndPassword(
+        auth,
+        email,
+        password
+      );
+      updateProfile(auth.currentUser, {
+        displayName: name,
+      });
+      const user = userCredential.user;
+      const formDataCopy = {...formData };
+      delete formDataCopy.password;
+      formDataCopy.timestamp = serverTimestamp();
+      await setDoc(doc(db,"users",user.uid),formDataCopy);
+      toast.success("Register successfully!");
+      
+      navigate("/");
+      
+
+      console.log(user);
+    } catch (error) {
+      toast.error(error.message);
+
+    }
   };
   return (
     <section>
@@ -37,8 +76,8 @@ function SignUp() {
           />
         </div>
         <div className="w-full md:w-[67%] lg:w-[40%] lg:ml-20">
-          <form>
-          <input
+          <form onSubmit={onSubmit}>
+            <input
               className="w-full px-4 py-2 mb-6 text-xl text-gray-700 transition ease-in-out bg-white border-gray-300 rounded"
               type="text"
               id="name"
@@ -84,17 +123,16 @@ function SignUp() {
               </p>
             </div>
             <button
-            className="w-full py-4 text-sm font-medium text-white transition duration-200 ease-in-out bg-blue-600 rounded shadow-md px-7 hover:bg-blue-700 hover:shadow-lg active:bg-blue-800"
-            type="submit"
-          >
-            Sign Up
-          </button>
-          <div className="flex items-center my-4 before:border-t before:flex-1 before:border-gray-300 after:border-t after:flex-1 after:border-gray-300">
-            <p className="mx-4 font-semibold text-center">OR</p>
-          </div>
-          <OAuth/>
+              className="w-full py-4 text-sm font-medium text-white transition duration-200 ease-in-out bg-blue-600 rounded shadow-md px-7 hover:bg-blue-700 hover:shadow-lg active:bg-blue-800"
+              type="submit"
+            >
+              Sign Up
+            </button>
+            <div className="flex items-center my-4 before:border-t before:flex-1 before:border-gray-300 after:border-t after:flex-1 after:border-gray-300">
+              <p className="mx-4 font-semibold text-center">OR</p>
+            </div>
+            <OAuth />
           </form>
-
         </div>
       </div>
     </section>
